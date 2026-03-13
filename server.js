@@ -5,7 +5,7 @@ const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productroutes")
 const paymentRoutes = require("./routes/paymentRoutes")
 const orderRoutes = require("./routes/orderRoutes")
-require("dotenv").config("/.env")
+require("dotenv").config()
 
 const app = express();
 
