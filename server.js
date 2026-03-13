@@ -4,7 +4,8 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productroutes")
 const paymentRoutes = require("./routes/paymentRoutes")
-require("dotenv").config()
+const orderRoutes = require("./routes/orderRoutes")
+require("dotenv").config("/.env")
 
 const app = express();
 
@@ -18,6 +19,7 @@ connectDB()
 app.use("/api", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/orders", orderRoutes);
 
 
 app.listen(5000, () => {
