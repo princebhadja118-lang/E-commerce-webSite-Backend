@@ -14,10 +14,20 @@ const orderSchema = new mongoose.Schema({
                 ref: "product",
             },
             quantity:Number,
+            img:String,
             title:String,
             price:Number,
+            
         }
     ],
+    date:{
+            type: Date,
+            default: Date.now
+        },
+        time:{
+            type: String,
+
+        },
     totalAmount:Number,
 
     shippingAddress:{

@@ -5,6 +5,7 @@ exports.createOrder = async (req, res) =>{
         const order = new Order(req.body);
 
         await order.save();
+        
 
         res.json({
             success: true,
