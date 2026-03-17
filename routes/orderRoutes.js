@@ -1,8 +1,7 @@
 const express = require("express");
-const {createOrder} = require("../controllers/order.controller")
-const {getAllOrders} = require("../controllers/order.controller")
-const {getOrders} = require("../controllers/order.controller")
-
+const {createOrder} = require("../controllers/order.controller");
+const {getAllOrders} = require("../controllers/order.controller");
+const {getOrders} = require("../controllers/order.controller");
 
 const router = express.Router();
 
