@@ -10,11 +10,22 @@ router.post('/register', async (req, res) => {
     try {
         const { username, email, password } = req.body;
 
+    const validateEmail = (email) => {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    };
+
+        
         const existingUser = await User.findOne({
             $or: [{ email }, { username }]
         });
-
-        if (existingUser) {
+        
+        if(!username || !email || !password) {
+            return res.status(400).json({ message: 'All fields are required' });
+        } 
+        else if (!validateEmail(email)) {
+            return res.status(400).json({ message: 'Invalid email format' });
+        }
+        else if (existingUser) {
             return res.status(400).json({ message: 'Email or username already exists' });
         }
 
@@ -54,13 +65,22 @@ router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const existingUser = await User.findOne({ email });
+        const validateEmail = (email) => {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        };
 
-        if (!existingUser) {
+        const existingUser = await User.findOne({ email });
+        
+        if(!email || !password) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+        else if (!validateEmail(email)) {
+            return res.status(400).json({ message: 'Invalid email format' });
+        }
+        else if (!existingUser) {
             return res.status(400).json({ message: "User not found" });
         }
-
-        if (existingUser.password !== password) {
+        else if (existingUser.password !== password) {
             return res.status(400).json({ message: "Wrong password" });
         }
 
@@ -94,6 +114,10 @@ router.put('/admin/update/:id', authMiddleware, async (req, res) => {
     try {
         const { username, email, role } = req.body;
 
+         const validateEmail = (email) => {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        };
+
         if (req.user.id !== req.params.id && req.user.role !== "admin") {
             return res.status(403).json({ message: "You are not authorized to update this user" })
         }
@@ -102,7 +126,13 @@ router.put('/admin/update/:id', authMiddleware, async (req, res) => {
             { username, email, role },
             { new: true, runValidators: true }
         ).select('-password');
-        if (!updateuser) {
+        if(!username || !email || !role) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+        else if (!validateEmail(email)) {
+            return res.status(400).json({ message: 'Invalid email format' });
+        }
+        else if (!updateuser) {
             return res.status(404).json({ message: "User not found" });
         }
         res.json({
