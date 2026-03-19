@@ -3,60 +3,41 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const authMiddleware = require('../middleware/authMiddleware')
+const validate = require("../middleware/validate.middleware")
+const {registerSchema} = require("../validators/auth.validator")
 
 
 // REGISTER
-router.post('/register', async (req, res) => {
-    try {
-        const { username, email, password } = req.body;
+router.post('/register', validate(registerSchema), async (req, res, next) => {
+  try {
+    const { username, email, password } = req.body;
 
-    const validateEmail = (email) => {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    };
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }]
+    });
 
-        
-        const existingUser = await User.findOne({
-            $or: [{ email }, { username }]
-        });
-        
-        if(!username || !email || !password) {
-            return res.status(400).json({ message: 'All fields are required' });
-        } 
-        else if (!validateEmail(email)) {
-            return res.status(400).json({ message: 'Invalid email format' });
-        }
-        else if (existingUser) {
-            return res.status(400).json({ message: 'Email or username already exists' });
-        }
-
-        const user = await User.create({
-            username,
-            email,
-            password
-        });
-
-        // Create JWT token
-        const token = jwt.sign(
-            { id: user._id, role: user.role },
-            process.env.JWT_SECRET,
-            { expiresIn: "1d" }
-        );
-
-        res.status(201).json({
-            message: 'User created successfully',
-            token,
-            user: {
-                id: user._id,
-                username: user.username,
-                email: user.email,
-                role: user.role
-            }
-        });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
+    if (existingUser) {
+      return next(new ApiError(400, "Email or username already exists"));
     }
+
+    const user = await User.create({ username, email, password });
+
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "User created successfully",
+      token,
+      user
+    });
+
+  } catch (error) {
+    next(error);
+  }
 });
 
 // LOGIN
