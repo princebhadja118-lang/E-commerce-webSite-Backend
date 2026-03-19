@@ -4,7 +4,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const authMiddleware = require('../middleware/authMiddleware')
 const validate = require("../middleware/validate.middleware")
-const {registerSchema} = require("../validators/auth.validator")
+const {registerSchema, loginSchema} = require("../validators/auth.validator")
 
 
 // REGISTER
@@ -41,23 +41,13 @@ router.post('/register', validate(registerSchema), async (req, res, next) => {
 });
 
 // LOGIN
-router.post('/login', async (req, res) => {
+router.post('/login', validate(loginSchema), async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const validateEmail = (email) => {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        };
-
         const existingUser = await User.findOne({ email });
         
-        if(!email || !password) {
-            return res.status(400).json({ message: 'All fields are required' });
-        }
-        else if (!validateEmail(email)) {
-            return res.status(400).json({ message: 'Invalid email format' });
-        }
-        else if (!existingUser) {
+        if (!existingUser) {
             return res.status(400).json({ message: "User not found" });
         }
         else if (existingUser.password !== password) {
