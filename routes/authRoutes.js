@@ -10,17 +10,17 @@ const {registerSchema, loginSchema} = require("../validators/auth.validator")
 // REGISTER
 router.post('/register', validate(registerSchema), async (req, res, next) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, role } = req.body;
 
     const existingUser = await User.findOne({
-      $or: [{ email }, { username }]
+      $or: [{ email }]
     });
 
     if (existingUser) {
-      return next(new ApiError(400, "Email or username already exists"));
+      return next(new ApiError(400, "Email already exists"));
     }
 
-    const user = await User.create({ username, email, password });
+    const user = await User.create({ username, email, password, role });
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
@@ -79,6 +79,43 @@ router.post('/login', validate(loginSchema), async (req, res) => {
     }
 });
 
+//Add User 
+router.post("/admin/add", async (req, res) => {
+    try {
+        const { username, email, password, role } = req.body;
+
+        const existingUser = await User.findOne({
+            $or: [{ email }]
+        });
+
+        if (existingUser) {
+            return res.status(400).json({ message: "Email already exists" });
+        }
+
+        const user = await User.create({ username, email, password, role });
+
+        const token = jwt.sign(
+            {
+                id: user._id,
+                role: user.role
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: "1d" }
+        );
+
+        res.status(201).json({
+            success: true,
+            message: "User created successfully",
+            token,
+            user
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+
 //update
 router.put('/admin/update/:id', authMiddleware, async (req, res) => {
     try {
@@ -121,8 +158,9 @@ router.put('/admin/update/:id', authMiddleware, async (req, res) => {
     }
 });
 
-//user Data 
-router.get('/users', async (req, res) => {
+
+//Data 
+router.get('/data', async (req, res) => {
     try {
         const users = await User.find().select('-password');
         res.json(users)
