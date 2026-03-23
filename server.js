@@ -5,6 +5,7 @@ const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productroutes")
 const paymentRoutes = require("./routes/paymentRoutes")
 const orderRoutes = require("./routes/orderRoutes")
+const dashboardRoutes = require("./routes/dashboardRoutes")
 const errorHandler = require("./middleware/error.middleware")
 require("dotenv").config()
 
@@ -21,6 +22,7 @@ app.use("/api", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 app.use(errorHandler);
 
