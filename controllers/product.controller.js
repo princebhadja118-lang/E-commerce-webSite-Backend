@@ -1,4 +1,5 @@
 const Product = require("../models/product.model");
+const User = require("../models/User");
 
 
 //Add Product
@@ -61,6 +62,7 @@ exports.getProducts = async (req, res) => {
     }
 }
 
+//get product by id
 exports.getProductsById = async (req, res) => {
     try{
         const product = await Product.findById(req.params.id);
@@ -97,14 +99,15 @@ exports.getCategoryProduct = async (req, res) => {
 //add Product in card
 exports.addProductToCard = async (req, res) => {
     const { productId } = req.params;
-    const { quantity } = req.body;
 
     try {
         const product = await Product.findById(productId);
         if (!product) {
             return res.status(404).json({ message: "Product not found" });
         }
-
+        if (product.stock <= 0) {
+            return res.status(400).json({ message: "Out of stock" });
+        }
         res.status(200).json({
             success: true,
             product

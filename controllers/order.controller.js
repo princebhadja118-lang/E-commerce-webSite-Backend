@@ -1,4 +1,5 @@
 const Order = require("../models/Order")
+const Product = require("../models/product.model")
 
 //create Order
 exports.createOrder = async (req, res) =>{
@@ -18,6 +19,21 @@ exports.createOrder = async (req, res) =>{
             return res.status(400).json({error: "All fields are required"});
         }
 
+        // Check stock and reduce
+        for (const item of products) {
+            const product = await Product.findById(item.productId || item._id);
+            if (!product) return res.status(404).json({ error: `Product not found: ${item.title}` });
+            if (product.stock < (item.quantity || 1)) {
+                return res.status(400).json({ error: `Insufficient stock for: ${product.title}` });
+            }
+        }
+
+        for (const item of products) {
+            await Product.findByIdAndUpdate(
+                item.productId || item._id,
+                { $inc: { stock: -(item.quantity || 1) } }
+            );
+        }
 
         const order = new Order({
             userId,

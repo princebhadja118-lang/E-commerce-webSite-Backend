@@ -23,6 +23,10 @@ const productSchema = new mongoose.Schema({
     category: {
         type: String,
         required: true
+    },
+    stock: {
+        type: Number,
+        default: 0
     }
 },{ timestamps: true });
 

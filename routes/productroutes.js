@@ -7,7 +7,6 @@ const { addProductToCard} = require("../controllers/product.controller")
 const { getProductsById } = require("../controllers/product.controller")
 const { deleteProduct } = require("../controllers/product.controller")
 
-
 const router = express.Router();
 router.post('/add-product', createProduct);
 router.get('/get-products', getProducts);
