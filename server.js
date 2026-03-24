@@ -1,3 +1,4 @@
+require("dotenv").config()
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
@@ -7,7 +8,6 @@ const paymentRoutes = require("./routes/paymentRoutes")
 const orderRoutes = require("./routes/orderRoutes")
 const dashboardRoutes = require("./routes/dashboardRoutes")
 const errorHandler = require("./middleware/error.middleware")
-require("dotenv").config()
 
 const app = express();
 
