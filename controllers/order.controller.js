@@ -1,12 +1,18 @@
 const Order = require("../models/Order")
 const Product = require("../models/product.model")
+const User = require("../models/User");
+const sendEmail = require("../utils/sendEmail"); 
 
 //create Order
 exports.createOrder = async (req, res) =>{
+    
     try {
 
+        const userId = req.user.id;
+        
+        
+        
         const {
-            userId = req.user.userId ,
             products,
             shippingAddress,
             totalAmount,
@@ -19,9 +25,12 @@ exports.createOrder = async (req, res) =>{
             return res.status(400).json({error: "All fields are required"});
         }
 
+        const user = await User.findById(userId);
+
         // Check stock and reduce
         for (const item of products) {
             const product = await Product.findById(item.productId || item._id);
+            
             if (!product) return res.status(404).json({ error: `Product not found: ${item.title}` });
             if (product.stock < (item.quantity || 1)) {
                 return res.status(400).json({ error: `Insufficient stock for: ${product.title}` });
@@ -45,7 +54,28 @@ exports.createOrder = async (req, res) =>{
             time
         });
 
+        const productList = products.map((item) => (
+            `${item.title} - Quantity: ${item.quantity || 1}`
+        ))
+
         await order.save();
+
+        // Send email notification
+        try{
+            await sendEmail(
+                user.email,
+                "Order Placed Successfully",
+                `Hello ${user.username},\n\n
+            
+                Your order has been placed successfully.\n\n
+                Order Details: ${productList.join("\n")}\n\n
+                Total Amount: $${totalAmount}\n\n
+                Thank you for shopping with us!`
+            );
+        } catch (error) {
+        console.error("Error sending email:", error);
+    }
+
 
         res.json({
             success: true,
