@@ -6,12 +6,9 @@ const sendEmail = require("../utils/sendEmail");
 //create Order
 exports.createOrder = async (req, res) =>{
     
-    try {
+    try{
 
-        const userId = req.user.id;
-        
-        
-        
+            const userId = req.user.id;
         const {
             products,
             shippingAddress,
@@ -54,37 +51,47 @@ exports.createOrder = async (req, res) =>{
             time
         });
 
-        const productList = products.map((item) => (
-            `${item.title} - Quantity: ${item.quantity || 1}`
-        ))
+        const productRows = products.map((item) => 
+         `<tr>
+            <td><img src="${item.img}" alt="${item.title}" width="60" style="border-radius:4px"/></td>
+            <td style="padding:8px">${item.title}</td>
+            <td style="padding:8px">${item.quantity || 1}</td>
+            <td style="padding:8px">₹${item.price || 0}</td>
+        </tr>`).join('');
+
+        const html = `
+            <h2>Order Placed Successfully</h2>
+            <p>Hello ${shippingAddress.name},</p>
+            <table border="1" cellpadding="6" cellspacing="0" style="width:100%; border-collapse:collapse">
+                <thead><tr><th>Image</th><th>Product</th><th>Qty</th><th>Price</th></tr></thead>
+                <tbody>${productRows}</tbody>
+            </table>
+            <p><strong>Total: ₹${totalAmount}</strong></p>
+            <p>Thank you for shopping with us!</p>`;
 
         await order.save();
 
         // Send email notification
         try{
             await sendEmail(
-                user.email,
+                shippingAddress.email,
                 "Order Placed Successfully",
-                `Hello ${user.username},\n\n
-            
-                Your order has been placed successfully.\n\n
-                Order Details: ${productList.join("\n")}\n\n
-                Total Amount: $${totalAmount}\n\n
-                Thank you for shopping with us!`
+                `Order ${order._id} placed. Total: ₹${totalAmount}`,
+                html
             );
         } catch (error) {
         console.error("Error sending email:", error);
     }
-
-
         res.json({
             success: true,
             message: "Order placed successfully",
             order
         });
     } catch(err) {
+        console.log("Error creating order:", err);
         res.status(500).json({error: err.message});
     }
+    
 };
 
 //Get all Order
