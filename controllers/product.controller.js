@@ -1,59 +1,19 @@
 const Product = require("../models/product.model");
-const User = require("../models/User");
 
-
-//Add Product
-exports.createProduct = async (req, res) => {
-    try{
-        const product = await Product.create(req.body);
-        res.status(201).json({
-            success: true,
-            product
-        });
-    }catch (err) {
-        res.status(500).json({
-            message: err.message
-        })
-    }
-}
-
-//Update Product
-exports.updateProduct = async (req, res) => {
-    try{
-            const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
-            res.status(200).json({
-                success: true,
-                product
-            });
-    }catch (err) {
-        res.status(500).json({
-            message: err.message
-        })
-    }
-}
-
-//delete product 
-exports.deleteProduct = async (req, res) => {
-    try{
-        const product = await Product.findByIdAndDelete(req.params.id);
-        res.status(200).json({
-            success: true,
-            product
-        });
-    }catch (err) {
-        res.status(500).json({
-            message: err.message
-        })
-    }
-}
 
 //Get Products
 exports.getProducts = async (req, res) => {
     try{
+        const {minPrice, maxPrice} = req.query;
         const products = await Product.find();
+        const filterProduct = products.filter(product => {
+            return product.price >= Number(minPrice) && product.price <= Number(maxPrice);
+        });
+        const orderByProduct = filterProduct.sort((a, b) => a.stock === b.stock ? 0 : a.stock > b.stock ? -1 : 1);
+
         res.status(200).json({
             success: true,
-            products
+            products: orderByProduct
         });
     }catch (err) {
         res.status(500).json({

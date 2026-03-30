@@ -9,6 +9,7 @@ const orderRoutes = require("./routes/orderRoutes")
 const dashboardRoutes = require("./routes/dashboardRoutes")
 const wishlistRoutes = require("./routes/wishlistRoutes")
 const errorHandler = require("./middleware/error.middleware")
+const adminRoutes = require("./routes/adminRoutes")
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(express.json());
 
 connectDB()
 app.use("/api", authRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/orders", orderRoutes);
