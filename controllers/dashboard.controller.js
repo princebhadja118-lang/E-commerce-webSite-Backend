@@ -1,5 +1,7 @@
 const Order = require("../models/Order");
 const User = require("../models/User");
+const bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
 
 exports.getDashboardStats = async (req, res) => {
   try {
@@ -45,6 +47,46 @@ exports.getDashboardStats = async (req, res) => {
     res.json(combined);
 
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+//Edit Profile 
+exports.editProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { username, email, password } = req.body;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Update fields
+    user.username = username || user.username;
+    user.email = email || user.email;
+
+    // Only update password if provided
+    if (password) {
+      if (password.length < 6) {
+        return res.status(400).json({
+          error: "Password must be at least 6 characters",
+        });
+      }
+
+      user.password = await bcrypt.hash(password, 10);
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      user,
+    });
+
+  } catch (err) {
+    console.log("Error editing profile:", err);
     res.status(500).json({ error: err.message });
   }
 };
