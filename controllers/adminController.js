@@ -35,7 +35,6 @@ exports.adminAddUser = asyncHandler(async (req, res) => {
   res.status(201).json({ success: true, message: "User created successfully", token, user: useWithoutPassword });
 });
 
-
 // ADMIN UPDATE USER
 exports.adminUpdateUser = asyncHandler(async (req, res, ) => {
     if (req.body.role && req.user.role !== "admin") {
